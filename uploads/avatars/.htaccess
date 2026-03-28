@@ -1,0 +1,13 @@
+# Prevent direct execution of any scripts in this directory
+Options -Indexes -ExecCGI
+AddHandler cgi-script .php .php3 .php4 .php5 .phtml .pl .py .jsp .asp .sh .cgi
+<Files *>
+    SetHandler none
+    SetHandler default-handler
+    Options -ExecCGI
+    php_flag engine off
+</Files>
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

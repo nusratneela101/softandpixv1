@@ -1,0 +1,8 @@
+# Route all requests in the demo subdomain to index.php
+RewriteEngine On
+
+# If uploaded demo files exist for this subdomain, serve them directly
+# Requests like subdomain.softandpix.com/path/file are served from demo/sites/{subdomain}/path/file
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /demo/index.php [L,QSA]

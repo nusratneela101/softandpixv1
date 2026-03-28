@@ -1,0 +1,385 @@
+/* =============================================================
+   Live Chat Widget — Softandpix
+   Floating chat bubble (bottom-right corner)
+   ============================================================= */
+
+/* ---- Widget container ---- */
+#lcw-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 99999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ---- Floating button ---- */
+#lcw-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+#lcw-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 28px rgba(13, 110, 253, 0.55);
+}
+
+/* ---- Unread badge ---- */
+#lcw-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 50%;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+}
+
+/* ---- Popup panel ---- */
+#lcw-popup {
+    width: 360px;
+    height: 520px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.18);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    margin-bottom: 12px;
+    animation: lcw-slideUp 0.25s ease;
+}
+
+#lcw-popup.lcw-open {
+    display: flex;
+}
+
+@keyframes lcw-slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Header ---- */
+#lcw-header {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+#lcw-header .lcw-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lcw-avatar-wrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.lcw-header-text h6 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.lcw-header-text span {
+    font-size: 0.75rem;
+    opacity: 0.85;
+}
+
+.lcw-online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+#lcw-close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.3rem;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+}
+
+#lcw-close-btn:hover { opacity: 1; }
+
+/* ---- Body ---- */
+#lcw-body {
+    flex: 1;
+    overflow-y: auto;
+    background: #f1f5f9;
+    scroll-behavior: smooth;
+}
+
+/* ---- Auth form ---- */
+#lcw-auth {
+    padding: 20px 18px;
+}
+
+#lcw-auth h6 {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+#lcw-auth p {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.lcw-field {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+
+.lcw-field:focus {
+    border-color: #0d6efd;
+}
+
+.lcw-textarea {
+    height: 80px;
+    resize: none;
+}
+
+.lcw-submit-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: opacity 0.15s;
+    font-family: inherit;
+}
+
+.lcw-submit-btn:hover { opacity: 0.9; }
+.lcw-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+#lcw-error {
+    color: #dc3545;
+    font-size: 0.78rem;
+    margin-top: 6px;
+    text-align: center;
+    min-height: 18px;
+}
+
+/* ---- Messages area ---- */
+#lcw-messages {
+    padding: 12px 14px;
+    display: none;
+}
+
+/* ---- Individual message ---- */
+.lcw-msg {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.lcw-msg.lcw-admin {
+    align-items: flex-start;
+}
+
+.lcw-msg.lcw-guest {
+    align-items: flex-end;
+}
+
+.lcw-msg-label {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-bottom: 3px;
+    padding: 0 4px;
+}
+
+.lcw-bubble {
+    max-width: 78%;
+    padding: 9px 13px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.lcw-msg.lcw-admin .lcw-bubble {
+    background: #fff;
+    color: #1e293b;
+    border-radius: 4px 14px 14px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.lcw-msg.lcw-guest .lcw-bubble {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: #fff;
+    border-radius: 14px 14px 4px 14px;
+}
+
+.lcw-msg-time {
+    font-size: 0.68rem;
+    color: #cbd5e1;
+    margin-top: 3px;
+    padding: 0 4px;
+}
+
+/* ---- Typing indicator ---- */
+.lcw-typing {
+    display: flex;
+    gap: 4px;
+    padding: 10px 13px;
+    background: #fff;
+    border-radius: 4px 14px 14px 14px;
+    width: fit-content;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+}
+
+.lcw-typing span {
+    width: 7px;
+    height: 7px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: lcw-bounce 1.2s infinite;
+}
+
+.lcw-typing span:nth-child(2) { animation-delay: 0.2s; }
+.lcw-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes lcw-bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+}
+
+/* ---- Welcome message ---- */
+.lcw-welcome-msg {
+    background: #fff;
+    border-radius: 4px 14px 14px 14px;
+    padding: 10px 13px;
+    font-size: 0.85rem;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+    max-width: 78%;
+}
+
+/* ---- Closed notice ---- */
+#lcw-closed-notice {
+    text-align: center;
+    padding: 14px;
+    background: #fff3cd;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #856404;
+    margin: 10px 14px;
+    display: none;
+}
+
+/* ---- Footer / send area ---- */
+#lcw-footer {
+    padding: 10px 12px;
+    border-top: 1px solid #e2e8f0;
+    display: none;
+    gap: 8px;
+    background: #fff;
+    flex-shrink: 0;
+    align-items: flex-end;
+}
+
+#lcw-input {
+    flex: 1;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 8px 14px;
+    outline: none;
+    font-size: 0.85rem;
+    resize: none;
+    max-height: 100px;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    line-height: 1.4;
+}
+
+#lcw-input:focus { border-color: #0d6efd; }
+
+#lcw-send-btn {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+}
+
+#lcw-send-btn:hover { opacity: 0.85; }
+#lcw-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ---- Mobile responsive ---- */
+@media (max-width: 480px) {
+    #lcw-widget {
+        bottom: 16px;
+        right: 16px;
+    }
+
+    #lcw-popup {
+        width: calc(100vw - 32px);
+        height: calc(100vh - 100px);
+        border-radius: 12px;
+    }
+}

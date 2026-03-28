@@ -1,0 +1,12 @@
+# Deny direct PHP execution
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|phar)$">
+    Require all denied
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Deny access to dangerous file types that could be executed
+<FilesMatch "\.(cgi|pl|py|rb|sh|bash|exe|com|bat|cmd)$">
+    Require all denied
+</FilesMatch>

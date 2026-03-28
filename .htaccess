@@ -1,0 +1,40 @@
+# Wildcard subdomain routing — send *.softandpix.com to the demo viewer
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^([a-z0-9-]+)\.softandpix\.com$ [NC]
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^(.*)$ /demo/index.php [L,QSA]
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# Block sensitive files
+<FilesMatch "\.(env|log|sql|bak|backup|ini|sh|htpasswd)$">
+    Require all denied
+</FilesMatch>
+
+# Block directory listing
+Options -Indexes
+
+# Prevent access to hidden files (except .htaccess itself)
+<FilesMatch "^\.(env|git|svn)">
+    Require all denied
+</FilesMatch>
+
+# PHP settings
+php_value upload_max_filesize 25M
+php_value post_max_size 30M
+php_value max_execution_time 120
+php_value session.cookie_httponly 1
+php_value session.cookie_secure 1
+php_value session.use_strict_mode 1
+
+# Custom error pages
+ErrorDocument 403 /errors/403.php
+ErrorDocument 404 /errors/404.php
+ErrorDocument 500 /errors/500.php

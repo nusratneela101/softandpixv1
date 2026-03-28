@@ -1,0 +1,344 @@
+@media (min-width: 320px) and (max-width: 575px) {
+  .menu-shrink {
+    display: none;
+  }
+  .header_area {
+    z-index: 999;
+  }
+  .scroll_down {
+    width: 25px;
+    height: 40px;
+    bottom: 6%;
+  }
+  .video_overview_area .overview_ctn {
+    width: 99%;
+  }
+  .video_overview_area .overview_ctn p {
+    font-size: 14px;
+  }
+  .project_overview_area .type_txt {
+    font-size: 14px;
+    padding-left: 20px;
+    margin-bottom: 40px;
+  }
+  .foter_share_link {
+    margin-bottom: 15px;
+  }
+  .contact_area .contact_ctn .con_ctn p {
+    width: 100%;
+  }
+  .more_info_source_area .more_info_box .more_info_titel span {
+    font-size: 14px;
+  }
+  .more_info_source_area .more_info_box .more_info_titel h2 {
+    font-size: 22px;
+    width: 100%;
+  }
+  .more_info_source_area .info_box {
+    margin-bottom: 40px;
+  }
+  .can_do_ctn .can_ctn {
+    margin-bottom: 30px;
+  }
+  .can_do_ctn_right img {
+    position: relative;
+    top: 0px;
+    margin-top: 30px;
+  }
+  .section_titel h2 {
+    font-size: 34px;
+  }
+  .about_area .about_ctn h2 {
+    font-size: 26px;
+    line-height: 30px;
+  }
+  .about_area .about_ctn {
+    top: 124px;
+  }
+  .video_overview_area .overview_ctn .popup_text {
+    margin-top: 0px;
+  }
+  .video_overview_area .overview_ctn p span {
+    font-size: 20px;
+  }
+  .welcome_page .welcm_icon_box .left_icn {
+    left: 0%;
+  }
+  .welcome_page .welcm_icon_box .right_icn {
+    right: 0%;
+  }
+  .welcome_page .welcm_icon_box .icon_box .wel_btn {
+    padding: 8px 10px;
+    font-size: 14px;
+    width: 150px;
+  }
+  .welcome_page .link_icon .icon_right a {
+    padding: 10px 10px;
+  }
+  .welcome_page .link_icon .icon_right a span {
+    font-size: 14px;
+  }
+  .welcome_page .link_icon .icon_right {
+    right: 0%;
+  }
+  .welcome_page .link_icon .icon_left {
+    left: 0%;
+  }
+  .welcome_page .link_icon .icon_left a {
+    padding: 10px 10px;
+  }
+  .welcome_page .link_icon .icon_left a span {
+    font-size: 14px;
+  }
+  .gallery_area .video_1 {
+    margin-top: 0px;
+  }
+  .video-background2 {
+    height: 50vh;
+  }
+  .navbar-toggler {
+    border: 1px solid #fff;
+  }
+  .navbar-toggler:focus {
+    -webkit-box-shadow: none;
+            box-shadow: none;
+  }
+  .navbar .navbar-toggler .navbar-toggler-icon i {
+    font-size: 28px;
+    color: #fff;
+  }
+  .chestmere_area .chest_text_box h1 {
+    font-size: 40px;
+  }
+  .gallery_area .video_1 {
+    margin-top: 0px;
+  }
+  #player62 {
+    display: none !important;
+  }
+  #player666 {
+    display: block !important;
+  }
+  .welcome_page {
+    height: 50vh;
+  }
+  .contact_area .contact_information p span {
+    font-size: 24px;
+  }
+  .contact_area .contact_information p {
+    font-size: 24px;
+  }
+  .chestmere_area .overview_ctn .t_2 {
+    font-size: 24px;
+  }
+  .chestmere_area .overview_ctn .t_1 .t_1_spp {
+    font-size: 46px;
+  }
+  .chestmere_area .overview_ctn .t_1 .t_1_sp {
+    font-size: 16px;
+  }
+  .contact_area .contact_information p .t_toop {
+    font-size: 32px;
+  }
+  .contact_area .contact_information p .t_botom {
+    font-size: 22px;
+  }
+  .contact_area .contact_information .rocky_cn_info {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .header_area {
+    z-index: 999;
+  }
+  .menu-shrink {
+    display: none;
+  }
+  .scroll_down {
+    width: 25px;
+    height: 40px;
+    bottom: 6%;
+  }
+  .gallery_area .video_1 {
+    margin-top: 0px;
+  }
+  .video_overview_area .overview_ctn {
+    width: 90%;
+  }
+  .video_overview_area .overview_ctn p {
+    font-size: 22px;
+  }
+  .video_overview_area .overview_ctn p span {
+    font-size: 22px;
+  }
+  .project_overview_area .type_txt {
+    font-size: 14px;
+    padding-left: 20px;
+    margin-bottom: 40px;
+  }
+  .more_info_source_area .more_info_box .more_info_titel h2 {
+    font-size: 22px;
+    width: 100%;
+  }
+  .more_info_source_area .info_box {
+    margin-bottom: 40px;
+  }
+  .can_do_ctn .can_ctn {
+    margin-bottom: 30px;
+  }
+  .can_do_ctn_right img {
+    position: relative;
+    top: 0px;
+    margin-top: 30px;
+  }
+  .section_titel h2 {
+    font-size: 34px;
+  }
+  .video_area #t_time_ctn {
+    left: 1%;
+    bottom: 19%;
+  }
+  .video-background2 {
+    height: 90vh;
+  }
+  .navbar-toggler {
+    border: 1px solid #fff;
+  }
+  .navbar-toggler:focus {
+    -webkit-box-shadow: none;
+            box-shadow: none;
+  }
+  .navbar .navbar-toggler .navbar-toggler-icon i {
+    font-size: 28px;
+    color: #fff;
+  }
+  #player62 {
+    display: none !important;
+  }
+  #player666 {
+    display: block !important;
+  }
+  .welcome_page {
+    height: 90vh;
+  }
+  .contact_area .contact_information p .t_toop {
+    font-size: 34px;
+  }
+  .contact_area .contact_information p .t_botom {
+    font-size: 22px;
+  }
+  .contact_area .contact_information .rocky_cn_info {
+    font-size: 22px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .navbar-toggler {
+    border: 1px solid #fff;
+  }
+  .navbar-toggler:focus {
+    -webkit-box-shadow: none;
+            box-shadow: none;
+  }
+  .navbar .navbar-toggler .navbar-toggler-icon i {
+    font-size: 28px;
+    color: #fff;
+  }
+  .menu-shrink {
+    display: none;
+  }
+  .header_area {
+    z-index: 999;
+  }
+  .scroll_down {
+    width: 25px;
+    height: 40px;
+    bottom: 6%;
+  }
+  .video_overview_area .overview_ctn {
+    width: 70%;
+  }
+  .video_overview_area .overview_ctn p {
+    font-size: 24px;
+  }
+  .video_overview_area .overview_ctn p span {
+    font-size: 24px;
+  }
+  .project_overview_area .type_txt {
+    font-size: 16px;
+    padding-left: 20px;
+    margin-bottom: 40px;
+  }
+  .more_info_source_area .more_info_box .more_info_titel h2 {
+    font-size: 24px;
+    width: 90%;
+  }
+  .more_info_source_area .info_box {
+    margin-bottom: 40px;
+  }
+  .can_do_ctn_right img {
+    position: relative;
+    top: 0px;
+    margin-top: 30px;
+  }
+  .can_do_ctn .can_ctn {
+    margin-bottom: 30px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .menu-shrink {
+    display: none;
+  }
+  .navbar-toggler {
+    border: 1px solid #fff;
+  }
+  .video_overview_area .overview_ctn {
+    top: 20%;
+  }
+  .side_nav .controls {
+    top: 20%;
+    right: 1%;
+    width: 100px;
+  }
+  .scroll_down {
+    bottom: 6%;
+  }
+}
+
+@media (max-aspect-ratio: 4 / 3) {
+  .video-foreground_in {
+    height: 300%;
+    top: -100%;
+  }
+}
+
+@media (min-aspect-ratio: 4 / 3) {
+  .video-foreground_in {
+    height: 300%;
+    top: -100%;
+  }
+}
+
+@media (min-aspect-ratio: 16 / 9) {
+  .video-foreground_in {
+    height: 300% !important;
+    top: -100% !important;
+  }
+}
+
+@media (max-aspect-ratio: 16 / 9) {
+  .video-foreground_in {
+    width: 500% !important;
+    left: -200% !important;
+  }
+}
+
+@media (aspect-ratio: 16 / 10) {
+  .video-foreground_in {
+    width: 567%;
+    left: -200%;
+  }
+}
+/*# sourceMappingURL=responsive.css.map */

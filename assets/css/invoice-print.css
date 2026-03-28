@@ -1,0 +1,125 @@
+/* Invoice Print Stylesheet */
+@media print {
+    /* Hide UI elements */
+    .sidebar,
+    .sidebar-wrapper,
+    .navbar,
+    .no-print,
+    .btn,
+    .alert,
+    nav[aria-label="breadcrumb"],
+    .page-header .btn,
+    footer,
+    .card.mb-3,
+    .col-lg-4 {
+        display: none !important;
+    }
+
+    /* Remove margins/padding from main content */
+    body {
+        background: #fff !important;
+        font-size: 12pt;
+        color: #000 !important;
+    }
+
+    .main-content,
+    .page-content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .container-fluid {
+        padding: 0 !important;
+    }
+
+    /* Make invoice card full width */
+    .col-lg-8,
+    .col-lg-4 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    .invoice-card,
+    .card.invoice-card {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+    }
+
+    .card-body {
+        padding: 0 !important;
+    }
+
+    /* Table styles */
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+
+    th, td {
+        border: 1px solid #ccc !important;
+        padding: 6px 10px !important;
+        font-size: 11pt !important;
+    }
+
+    thead th {
+        background: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .table-dark th {
+        background: #333 !important;
+        color: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .table-light th {
+        background: #f5f5f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Badge colors */
+    .badge {
+        border: 1px solid #999 !important;
+        padding: 2px 6px !important;
+        font-size: 10pt !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Ensure page breaks cleanly */
+    .invoice-card,
+    .card {
+        page-break-inside: avoid;
+    }
+
+    /* Links should show URL */
+    a[href]:after {
+        content: none !important;
+    }
+
+    /* Remove row colors */
+    .row {
+        margin: 0 !important;
+    }
+
+    h2, h3, h4 {
+        margin-top: 0;
+    }
+}
+
+/* Screen styles for invoice-print.css (keeps invoice looking clean on screen too) */
+@media screen {
+    .invoice-print-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 40px;
+        box-shadow: 0 2px 16px rgba(0,0,0,.08);
+        border-radius: 8px;
+    }
+}

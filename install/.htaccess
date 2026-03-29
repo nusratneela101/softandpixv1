@@ -1,0 +1,5 @@
+# Install wizard needs relaxed CSP for AJAX (jQuery $.post)
+<IfModule mod_headers.c>
+    Header unset Content-Security-Policy
+    Header always set Content-Security-Policy "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://code.jquery.com; connect-src 'self'; img-src 'self' data:; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com;"
+</IfModule>

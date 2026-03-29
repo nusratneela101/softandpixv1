@@ -1,0 +1,11 @@
+config/installed.lock
+uploads/*
+!uploads/.htaccess
+*.log
+.env
+node_modules/
+.DS_Store
+vendor/
+.phpunit.cache/
+composer.lock
+.phpunit.result.cache

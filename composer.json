@@ -1,0 +1,29 @@
+{
+    "name": "softandpix/project-management",
+    "description": "SoftandPix Project Management System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "files": [
+            "includes/functions.php",
+            "includes/auth.php",
+            "includes/activity_logger.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.3"
+        }
+    }
+}

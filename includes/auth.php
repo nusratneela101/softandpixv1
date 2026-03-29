@@ -5,7 +5,30 @@ if (session_status() === PHP_SESSION_NONE) {
 
 function requireLogin() {
     if (!isset($_SESSION['user_id'])) {
-        header('Location: /login.php');
+        header('Location: /login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        exit;
+    }
+}
+
+function requireClient() {
+    requireLogin();
+    if (!in_array($_SESSION['user_role'], ['client', 'admin'])) {
+        header('Location: /login.php?error=unauthorized');
+        exit;
+    }
+}
+
+function requireDeveloper() {
+    requireLogin();
+    if (!in_array($_SESSION['user_role'], ['developer', 'admin'])) {
+        header('Location: /login.php?error=unauthorized');
+        exit;
+    }
+}
+
+function requireAdmin() {
+    if (!isset($_SESSION['admin_id'])) {
+        header('Location: /admin/login.php');
         exit;
     }
 }
@@ -38,3 +61,5 @@ function getCurrentUser() {
         'email'=> $_SESSION['user_email'] ?? '',
     ];
 }
+
+require_once __DIR__ . '/security.php';

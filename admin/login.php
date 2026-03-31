@@ -7,7 +7,7 @@ if (!file_exists(__DIR__ . '/../config/installed.lock') && file_exists(__DIR__ .
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-require_once '../config/db.php';
+require_once dirname(__DIR__) . '/config/db.php';
 
 if (isset($_SESSION['admin_id'])) {
     header('Location: index.php');

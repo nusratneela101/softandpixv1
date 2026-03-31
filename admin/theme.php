@@ -2,11 +2,11 @@
 /**
  * Admin — Theme Customizer
  */
-require_once '../config/db.php';
-require_once '../includes/auth.php';
-require_once '../includes/language.php';
-require_once '../includes/theme.php';
-require_once '../includes/activity_logger.php';
+require_once dirname(__DIR__) . '/config/db.php';
+require_once dirname(__DIR__) . '/includes/auth.php';
+require_once dirname(__DIR__) . '/includes/language.php';
+require_once dirname(__DIR__) . '/includes/theme.php';
+require_once dirname(__DIR__) . '/includes/activity_logger.php';
 requireAdmin();
 
 $page_title = __('theme');

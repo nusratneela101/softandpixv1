@@ -1,5 +1,5 @@
 <?php
-require_once '../config/db.php';
+require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
 requireAuth();
 
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
 
     } elseif ($action === 'send_email') {
         // Send invoice email to client
-        require_once '../includes/email.php';
+        require_once dirname(__DIR__) . '/includes/email.php';
         try {
             $stmt = $pdo->prepare("SELECT i.*, u.name as client_name, u.email as client_email FROM invoices i LEFT JOIN users u ON u.id=i.client_id WHERE i.id=?");
             $stmt->execute([$id]);
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verifyCsrfToken($_POST['csrf_token'
 
     } elseif ($action === 'send_reminder') {
         // Send payment reminder email to client
-        require_once '../includes/email.php';
+        require_once dirname(__DIR__) . '/includes/email.php';
         try {
             $stmt = $pdo->prepare("SELECT i.*, u.name as client_name, u.email as client_email FROM invoices i LEFT JOIN users u ON u.id=i.client_id WHERE i.id=?");
             $stmt->execute([$id]);

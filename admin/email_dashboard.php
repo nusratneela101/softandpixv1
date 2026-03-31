@@ -1,5 +1,5 @@
 <?php
-require_once '../config/db.php';
+require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
 requireAuth();
 
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($subject) || empty($body)) {
             $error = 'Subject and body are required.';
         } else {
-            require_once '../includes/email.php';
+            require_once dirname(__DIR__) . '/includes/email.php';
             $recipients = [];
             
             if ($sendTo === 'individual' && $userId > 0) {

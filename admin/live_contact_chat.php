@@ -4,7 +4,7 @@
  * Admin chat view for a specific live contact
  * Two-panel layout: contact info (left) + chat (right)
  */
-require_once '../config/db.php';
+require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
 requireAuth();
 

@@ -41,7 +41,7 @@ require_once 'includes/header.php';
     <div class="card shadow-sm">
       <div class="card-header fw-semibold"><i class="bi bi-file-earmark-arrow-down me-2 text-primary"></i>Generate Export</div>
       <div class="card-body">
-        <form id="exportForm" action="/api/export.php" method="POST">
+        <form id="exportForm" action="../api/export.php" method="POST">
           <input type="hidden" name="csrf_token" value="<?= h($csrf_token) ?>">
 
           <div class="mb-3">

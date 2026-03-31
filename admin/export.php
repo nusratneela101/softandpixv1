@@ -3,12 +3,10 @@
  * Admin Export Dashboard
  * Choose data type, filters, format — then download.
  */
-define('BASE_PATH', dirname(__DIR__));
-define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
-require_once BASE_PATH . '/includes/header.php';
-require_role('admin');
-update_online_status($pdo, $_SESSION['user_id']);
-require_once BASE_PATH . '/includes/export_helper.php';
+require_once dirname(__DIR__) . '/config/db.php';
+require_once 'includes/auth.php';
+requireAuth();
+require_once dirname(__DIR__) . '/includes/export_helper.php';
 ensureExportTables($pdo);
 
 $csrf_token = generateCsrfToken();
@@ -25,34 +23,33 @@ try {
 }
 
 $dataTypes = getExportableDataTypes();
+
+require_once 'includes/header.php';
 ?>
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Export Data — SoftandPix Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="<?= e(BASE_URL) ?>/public/assets/css/style.css" rel="stylesheet"></head><body>
-<?php include BASE_PATH . '/includes/sidebar_admin.php'; ?>
-<div class="topbar"><div class="topbar-left"><button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button><h5 class="mb-0">Export Data</h5></div>
-<div class="topbar-right"><span class="text-muted small"><i class="fas fa-download me-1"></i>CSV / Excel / PDF</span></div></div>
-<div class="main-content">
-
-<?php include BASE_PATH . '/includes/flash.php'; ?>
-
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-download me-2"></i>Export Data</h1>
+    </div>
+    <div>
+        <span class="text-muted small"><i class="bi bi-file-earmark-arrow-down me-1"></i>CSV / Excel / PDF</span>
+    </div>
+</div>
+<div class="container-fluid">
 <div class="row g-4">
   <!-- Export Form -->
   <div class="col-lg-5">
     <div class="card shadow-sm">
-      <div class="card-header fw-semibold"><i class="fas fa-file-export me-2 text-primary"></i>Generate Export</div>
+      <div class="card-header fw-semibold"><i class="bi bi-file-earmark-arrow-down me-2 text-primary"></i>Generate Export</div>
       <div class="card-body">
-        <form id="exportForm" action="<?= e(BASE_URL) ?>/api/export.php" method="POST">
-          <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
+        <form id="exportForm" action="../api/export.php" method="POST">
+          <input type="hidden" name="csrf_token" value="<?= h($csrf_token) ?>">
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Data Type</label>
             <select name="data_type" id="dataType" class="form-select" required>
               <option value="">— Select data type —</option>
               <?php foreach ($dataTypes as $key => $info): ?>
-              <option value="<?= e($key) ?>"><?= e(is_array($info) ? $info['label'] : $info) ?></option>
+              <option value="<?= h($key) ?>"><?= h(is_array($info) ? $info['label'] : $info) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
@@ -136,16 +133,16 @@ $dataTypes = getExportableDataTypes();
             <tr><td colspan="7" class="text-center text-muted py-4">No exports yet.</td></tr>
           <?php else: foreach ($history as $h): ?>
             <tr>
-              <td><span class="badge bg-light text-dark border"><?= e(ucfirst(str_replace('_', ' ', $h['data_type']))) ?></span></td>
-              <td><span class="badge bg-<?= $h['export_type'] === 'pdf' ? 'danger' : 'success' ?>"><?= strtoupper(e($h['export_type'])) ?></span></td>
+              <td><span class="badge bg-light text-dark border"><?= h(ucfirst(str_replace('_', ' ', $h['data_type']))) ?></span></td>
+              <td><span class="badge bg-<?= $h['export_type'] === 'pdf' ? 'danger' : 'success' ?>"><?= strtoupper(h($h['export_type'])) ?></span></td>
               <td><?= number_format((int)$h['record_count']) ?></td>
               <td><?= formatFileSize((int)$h['file_size']) ?></td>
-              <td><?= e($h['user_name'] ?? '—') ?></td>
-              <td><?= time_ago($h['created_at']) ?></td>
+              <td><?= h($h['user_name'] ?? '—') ?></td>
+              <td><?= date('M j, Y H:i', strtotime($h['created_at'])) ?></td>
               <td>
-                <?php if (!empty($h['file_path']) && file_exists(BASE_PATH . '/' . ltrim($h['file_path'], '/'))): ?>
-                  <a href="<?= e(BASE_URL . '/' . ltrim($h['file_path'], '/')) ?>" class="btn btn-xs btn-outline-primary" download>
-                    <i class="fas fa-download"></i>
+                <?php if (!empty($h['file_path']) && file_exists(dirname(__DIR__) . '/' . ltrim($h['file_path'], '/'))): ?>
+                  <a href="<?= h('/' . ltrim($h['file_path'], '/')) ?>" class="btn btn-xs btn-outline-primary" download>
+                    <i class="bi bi-download"></i>
                   </a>
                 <?php else: ?>
                   <span class="text-muted small">expired</span>
@@ -161,13 +158,12 @@ $dataTypes = getExportableDataTypes();
 </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.getElementById('exportForm').addEventListener('submit', function(e) {
     var btn = document.getElementById('exportBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
-    setTimeout(function() { btn.disabled = false; btn.innerHTML = '<i class="fas fa-download me-2"></i>Download Export'; }, 8000);
+    setTimeout(function() { btn.disabled = false; btn.innerHTML = '<i class="bi bi-download me-2"></i>Download Export'; }, 8000);
 });
 
 document.getElementById('previewBtn').addEventListener('click', function() {
@@ -197,4 +193,4 @@ document.getElementById('previewBtn').addEventListener('click', function() {
         .catch(function() { alert('Preview failed.'); });
 });
 </script>
-</body></html>
+<?php require_once 'includes/footer.php'; ?>

@@ -3,12 +3,10 @@
  * Admin E-Signature Dashboard
  * Lists all documents, allows management (revoke, delete, filter).
  */
-define('BASE_PATH', dirname(__DIR__));
-define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
-require_once BASE_PATH . '/includes/header.php';
-require_role('admin');
-update_online_status($pdo, $_SESSION['user_id']);
-require_once BASE_PATH . '/includes/esign_helper.php';
+require_once dirname(__DIR__) . '/config/db.php';
+require_once 'includes/auth.php';
+requireAuth();
+require_once dirname(__DIR__) . '/includes/esign_helper.php';
 ensureEsignTables($pdo);
 
 $csrf_token = generateCsrfToken();
@@ -68,16 +66,18 @@ try {
         'expired' => $pdo->query("SELECT COUNT(*) FROM esign_documents WHERE status='expired'")->fetchColumn(),
     ];
 } catch (Exception $e) { $stats = ['total' => 0, 'pending' => 0, 'signed' => 0, 'expired' => 0]; }
+
+require_once 'includes/header.php';
 ?>
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>E-Signatures — SoftandPix Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="<?= e(BASE_URL) ?>/public/assets/css/style.css" rel="stylesheet"></head><body>
-<?php include BASE_PATH . '/includes/sidebar_admin.php'; ?>
-<div class="topbar"><div class="topbar-left"><button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button><h5 class="mb-0">E-Signatures</h5></div>
-<div class="topbar-right"><a href="esign_create.php" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>New Document</a></div></div>
-<div class="main-content">
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-pen me-2"></i>E-Signatures</h1>
+    </div>
+    <div>
+        <a href="esign_create.php" class="btn btn-primary btn-sm"><i class="bi bi-plus me-1"></i>New Document</a>
+    </div>
+</div>
+<div class="container-fluid">
 
 <!-- Stats -->
 <div class="row g-3 mb-4">
@@ -121,10 +121,10 @@ try {
     <td><?= h($doc['creator_name'] ?? '—') ?></td>
     <td><?= getEsignStatusBadge($doc['status']) ?></td>
     <td><span class="badge bg-secondary"><?= $sigSigned ?>/<?= $signerTotal ?></span></td>
-    <td><?= time_ago($doc['created_at']) ?></td>
+    <td><?= date('M j, Y H:i', strtotime($doc['created_at'])) ?></td>
     <td><?= $doc['expires_at'] ? date('M j, Y', strtotime($doc['expires_at'])) : '—' ?></td>
     <td>
-        <a href="<?= e(BASE_URL) ?>/esign/verify.php?hash=<?= h($doc['unique_hash'] ?? '') ?>" class="btn btn-sm btn-outline-info" title="View" target="_blank"><i class="fas fa-eye"></i></a>
+        <a href="<?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'); ?>/esign/verify.php?hash=<?= h($doc['unique_hash'] ?? '') ?>" class="btn btn-sm btn-outline-info" title="View" target="_blank"><i class="bi bi-eye"></i></a>
         <?php if ($doc['status'] === 'pending'): ?>
         <form method="POST" class="d-inline" onsubmit="return confirm('Revoke this document?')">
             <input type="hidden" name="csrf_token" value="<?= h($csrf_token) ?>">
@@ -150,4 +150,4 @@ try {
 <?php endif; ?>
 </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script></body></html>
+<?php require_once 'includes/footer.php'; ?>

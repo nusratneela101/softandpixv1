@@ -2,12 +2,10 @@
 /**
  * Admin Payment Gateway Settings
  */
-define('BASE_PATH', dirname(__DIR__));
-define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
-require_once BASE_PATH . '/includes/header.php';
-require_role('admin');
-update_online_status($pdo, $_SESSION['user_id']);
-require_once BASE_PATH . '/includes/payment_helper.php';
+require_once dirname(__DIR__) . '/config/db.php';
+require_once 'includes/auth.php';
+requireAuth();
+require_once dirname(__DIR__) . '/includes/payment_helper.php';
 ensurePaymentTables($pdo);
 
 $csrf_token = generateCsrfToken();
@@ -64,21 +62,21 @@ function setting(array $s, string $key, $default = ''): string
 {
     return htmlspecialchars((string)($s[$key] ?? $default), ENT_QUOTES, 'UTF-8');
 }
-?>
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Payment Settings — SoftandPix Admin</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-<link href="<?= e(BASE_URL) ?>/public/assets/css/style.css" rel="stylesheet"></head><body>
-<?php include BASE_PATH . '/includes/sidebar_admin.php'; ?>
-<div class="topbar"><div class="topbar-left"><button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button><h5 class="mb-0">Payment Gateway Settings</h5></div>
-<div class="topbar-right"><a href="payments.php" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i>Payments</a></div></div>
-<div class="main-content">
 
-<?php include BASE_PATH . '/includes/flash.php'; ?>
+require_once 'includes/header.php';
+?>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1><i class="bi bi-gear me-2"></i>Payment Gateway Settings</h1>
+    </div>
+    <div>
+        <a href="payments.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Payments</a>
+    </div>
+</div>
+<div class="container-fluid">
 
 <form method="POST" action="payment_settings.php">
-  <input type="hidden" name="csrf_token" value="<?= e($csrf_token) ?>">
+  <input type="hidden" name="csrf_token" value="<?= h($csrf_token) ?>">
   <div class="row g-4">
 
     <!-- General -->
@@ -133,7 +131,7 @@ function setting(array $s, string $key, $default = ''): string
           </div>
           <div class="alert alert-light border small mb-0">
             <strong>Webhook URL:</strong><br>
-            <code><?= e(BASE_URL) ?>/payment/stripe_webhook.php</code>
+            <code><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/payment/stripe_webhook.php'; ?></code>
           </div>
         </div>
       </div>
@@ -170,7 +168,7 @@ function setting(array $s, string $key, $default = ''): string
           </div>
           <div class="alert alert-light border small mb-0">
             <strong>Webhook URL:</strong><br>
-            <code><?= e(BASE_URL) ?>/payment/paypal_webhook.php</code>
+            <code><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/payment/paypal_webhook.php'; ?></code>
           </div>
         </div>
       </div>
@@ -200,5 +198,4 @@ function setting(array $s, string $key, $default = ''): string
   </div>
 </form>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body></html>
+<?php require_once 'includes/footer.php'; ?>

@@ -4,10 +4,15 @@
  */
 require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
-require_once dirname(__DIR__) . '/includes/language.php';
 require_once dirname(__DIR__) . '/includes/theme.php';
-require_once dirname(__DIR__) . '/includes/activity_logger.php';
 requireAuth();
+
+if (!function_exists('__')) {
+    function __($key) { return $key; }
+}
+if (!function_exists('log_activity')) {
+    function log_activity($pdo, $userId, $action, $details, $entity_type = null, $entity_id = null) {}
+}
 
 $page_title = __('theme');
 $admin_id   = $_SESSION['admin_id'];

@@ -3,9 +3,9 @@
  * Admin — Advanced Reports & Analytics
  */
 require_once dirname(__DIR__) . '/config/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
+require_once 'includes/auth.php';
 require_once dirname(__DIR__) . '/includes/language.php';
-requireAdmin();
+requireAuth();
 
 $page_title = __('reports');
 $from = $_GET['from'] ?? date('Y-m-01');

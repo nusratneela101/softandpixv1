@@ -4,7 +4,7 @@
  */
 require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
-requireAdmin();
+requireAuth();
 
 // Load upcoming meetings (all for admin)
 try {

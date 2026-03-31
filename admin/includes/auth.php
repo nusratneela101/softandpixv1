@@ -44,3 +44,8 @@ function getFlashMessage() {
     }
     return null;
 }
+
+// Alias so files that call requireAdmin() also work with this auth file
+function requireAdmin() {
+    requireAuth();
+}

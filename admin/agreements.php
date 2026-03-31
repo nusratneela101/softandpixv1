@@ -3,6 +3,26 @@ require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
 requireAuth();
 
+// Ensure agreements table exists
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS agreements (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        project_name VARCHAR(255) DEFAULT NULL,
+        total_budget DECIMAL(12,2) DEFAULT 0,
+        deadline DATE DEFAULT NULL,
+        terms TEXT,
+        status ENUM('draft','pending','approved','rejected','signed') DEFAULT 'pending',
+        signed_at DATETIME DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+} catch (PDOException $e) {
+    // Table already exists or DB error — continue
+}
+
 $agreements = $pdo->query("SELECT a.*, u.name as client_name FROM agreements a JOIN users u ON a.client_id=u.id ORDER BY a.created_at DESC")->fetchAll();
 
 require_once 'includes/header.php';

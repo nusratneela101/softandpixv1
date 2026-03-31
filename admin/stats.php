@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'add') {
         try {
-            $stmt = $pdo->prepare("INSERT INTO stats (icon_class, icon_color, count_end, label, sort_order) VALUES (?,?,?,?,?)");
-            $stmt->execute([trim($_POST['icon_class']), trim($_POST['icon_color']), (int)$_POST['count_end'], trim($_POST['label']), (int)($_POST['sort_order'] ?? 0)]);
+            $stmt = $pdo->prepare("INSERT INTO stats (icon, icon_color, count_end, label, sort_order) VALUES (?,?,?,?,?)");
+            $stmt->execute([trim($_POST['icon']), trim($_POST['icon_color']), (int)$_POST['count_end'], trim($_POST['label']), (int)($_POST['sort_order'] ?? 0)]);
             flashMessage('success', 'Stat added successfully!');
         } catch(PDOException $e) {
             flashMessage('error', 'Database error. Please try again.');
@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'edit') {
         $id = (int)$_POST['id'];
         try {
-            $stmt = $pdo->prepare("UPDATE stats SET icon_class=?, icon_color=?, count_end=?, label=?, sort_order=? WHERE id=?");
-            $stmt->execute([trim($_POST['icon_class']), trim($_POST['icon_color']), (int)$_POST['count_end'], trim($_POST['label']), (int)($_POST['sort_order'] ?? 0), $id]);
+            $stmt = $pdo->prepare("UPDATE stats SET icon=?, icon_color=?, count_end=?, label=?, sort_order=? WHERE id=?");
+            $stmt->execute([trim($_POST['icon']), trim($_POST['icon_color']), (int)$_POST['count_end'], trim($_POST['label']), (int)($_POST['sort_order'] ?? 0), $id]);
             flashMessage('success', 'Stat updated successfully!');
         } catch(PDOException $e) {
             flashMessage('error', 'Database error. Please try again.');
@@ -87,7 +87,7 @@ require_once 'includes/header.php';
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Icon Class *</label>
-                        <input type="text" name="icon_class" class="form-control" placeholder="e.g. bi bi-people" value="<?php echo h($edit_item['icon_class'] ?? ''); ?>" required>
+                        <input type="text" name="icon" class="form-control" placeholder="e.g. bi bi-people" value="<?php echo h($edit_item['icon'] ?? ''); ?>" required>
                         <div class="form-text">Bootstrap Icons class name</div>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -139,7 +139,7 @@ require_once 'includes/header.php';
                         <?php foreach ($stats as $stat): ?>
                         <tr>
                             <td><?php echo (int)$stat['id']; ?></td>
-                            <td><i class="<?php echo h($stat['icon_class']); ?>" style="color:<?php echo h($stat['icon_color']); ?>; font-size:20px;"></i></td>
+                            <td><i class="<?php echo h($stat['icon']); ?>" style="color:<?php echo h($stat['icon_color']); ?>; font-size:20px;"></i></td>
                             <td><span style="background:<?php echo h($stat['icon_color']); ?>; display:inline-block; width:24px; height:24px; border-radius:50%; border:1px solid #ccc;"></span> <?php echo h($stat['icon_color']); ?></td>
                             <td><?php echo (int)$stat['count_end']; ?></td>
                             <td><?php echo h($stat['label']); ?></td>

@@ -7,16 +7,33 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin','client','developer') NOT NULL DEFAULT 'client',
-    phone VARCHAR(50),
-    address TEXT,
+    role VARCHAR(100) DEFAULT 'client',
     avatar VARCHAR(255),
+    phone VARCHAR(50),
+    company VARCHAR(255),
+    country VARCHAR(100),
+    address TEXT,
+    bio TEXT,
+    skills TEXT,
+    portfolio_url VARCHAR(500),
+    github_url VARCHAR(500),
+    linkedin_url VARCHAR(500),
+    dribbble_url VARCHAR(500),
+    behance_url VARCHAR(500),
+    custom_field_1_label VARCHAR(100),
+    custom_field_1_value VARCHAR(500),
+    custom_field_2_label VARCHAR(100),
+    custom_field_2_value VARCHAR(500),
     is_active TINYINT(1) DEFAULT 1,
-    last_activity DATETIME,
+    _cf TINYINT DEFAULT 0,
     email_verified TINYINT(1) DEFAULT 0,
     verification_token VARCHAR(255),
     reset_token VARCHAR(255),
     reset_expires DATETIME,
+    login_attempts INT DEFAULT 0,
+    locked_until DATETIME NULL,
+    last_login TIMESTAMP NULL,
+    last_active TIMESTAMP NULL DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -79,13 +96,23 @@ CREATE TABLE IF NOT EXISTS agreements (
 CREATE TABLE IF NOT EXISTS projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     agreement_id INT,
-    name VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     description TEXT,
-    client_id INT NOT NULL,
-    developer_id INT,
+    client_id INT NULL,
+    developer_id INT NULL,
+    admin_id INT NULL,
+    status ENUM('pending','in_progress','on_hold','completed','cancelled') DEFAULT 'pending',
+    priority ENUM('low','medium','high','urgent') DEFAULT 'medium',
+    start_date DATE NULL,
     deadline DATE,
-    budget DECIMAL(10,2),
-    status ENUM('active','in_progress','completed','on_hold','cancelled') DEFAULT 'active',
+    budget DECIMAL(10,2) DEFAULT 0,
+    currency VARCHAR(10) DEFAULT 'USD',
+    demo_subdomain VARCHAR(100) NULL,
+    demo_url VARCHAR(500) NULL,
+    demo_enabled TINYINT DEFAULT 0,
+    demo_password VARCHAR(255) NULL,
+    demo_expires_at DATETIME NULL,
+    demo_has_files TINYINT DEFAULT 0,
     progress INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -145,9 +172,11 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     invoice_id INT NOT NULL,
     description VARCHAR(500),
-    quantity INT DEFAULT 1,
+    quantity DECIMAL(10,2) DEFAULT 1,
+    unit_price DECIMAL(10,2) DEFAULT 0,
     rate DECIMAL(10,2),
     amount DECIMAL(10,2),
+    sort_order INT DEFAULT 0,
     FOREIGN KEY (invoice_id) REFERENCES invoices(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -233,7 +262,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Site settings
-CREATE TABLE IF NOT EXISTS settings (
+CREATE TABLE IF NOT EXISTS site_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
     setting_key VARCHAR(255) UNIQUE NOT NULL,
     setting_value TEXT,
@@ -254,7 +283,7 @@ INSERT INTO chatbot_rules (keywords, response, priority) VALUES
 ('bye,goodbye,see you', 'Thank you for chatting with us! Have a great day!', 5);
 
 -- Default settings
-INSERT INTO settings (setting_key, setting_value) VALUES
+INSERT INTO site_settings (setting_key, setting_value) VALUES
 ('site_name', 'SoftandPix'),
 ('site_url', ''),
 ('site_logo', ''),
@@ -435,4 +464,338 @@ CREATE TABLE IF NOT EXISTS message_translations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_translation (message_id, target_lang),
     INDEX idx_message (message_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- P) Custom Roles Table
+-- =====================================================
+CREATE TABLE IF NOT EXISTS custom_roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(100) UNIQUE NOT NULL,
+    role_label VARCHAR(100) NOT NULL,
+    role_color VARCHAR(20) DEFAULT '#6c757d',
+    role_icon VARCHAR(100) DEFAULT 'bi-person',
+    description TEXT,
+    profile_fields JSON,
+    permissions JSON,
+    is_active TINYINT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Q) Project Milestones & Updates
+-- =====================================================
+CREATE TABLE IF NOT EXISTS project_milestones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    due_date DATE NULL,
+    status ENUM('pending','in_progress','completed') DEFAULT 'pending',
+    sort_order INT DEFAULT 0,
+    completed_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_project (project_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS project_updates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- R) Project Folders & File Comments
+-- =====================================================
+CREATE TABLE IF NOT EXISTS project_folders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    parent_id INT DEFAULT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_project (project_id),
+    INDEX idx_parent (parent_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS file_comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    file_id INT NOT NULL,
+    user_id INT NOT NULL,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_file (file_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- S) Project Tasks & Activity Log & Daily Logs
+-- =====================================================
+CREATE TABLE IF NOT EXISTS project_tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    milestone_id INT DEFAULT NULL,
+    assigned_to INT DEFAULT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    status ENUM('todo','in_progress','review','completed') DEFAULT 'todo',
+    priority ENUM('low','medium','high','urgent') DEFAULT 'medium',
+    estimated_hours DECIMAL(5,1) DEFAULT NULL,
+    actual_hours DECIMAL(5,1) DEFAULT NULL,
+    due_date DATE DEFAULT NULL,
+    sort_order INT DEFAULT 0,
+    completed_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_project (project_id),
+    INDEX idx_milestone (milestone_id),
+    INDEX idx_assigned (assigned_to),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS project_activity_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    user_id INT NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    description TEXT,
+    entity_type VARCHAR(50) DEFAULT NULL,
+    entity_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_project (project_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS project_daily_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    user_id INT NOT NULL,
+    log_date DATE NOT NULL,
+    hours_worked DECIMAL(5,1) DEFAULT 0,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_date (project_id, user_id, log_date),
+    INDEX idx_project_date (project_id, log_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- T) Chat Conversations, Participants & Messages
+-- =====================================================
+CREATE TABLE IF NOT EXISTS chat_conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT DEFAULT NULL,
+    type ENUM('project','direct','support') DEFAULT 'project',
+    title VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_project (project_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_participants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role ENUM('admin','developer','client') DEFAULT 'client',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_read_at TIMESTAMP NULL,
+    is_typing TINYINT(1) DEFAULT 0,
+    typing_updated_at TIMESTAMP NULL,
+    UNIQUE KEY unique_conv_user (conversation_id, user_id),
+    INDEX idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    message TEXT,
+    message_type ENUM('text','file','image','link','system') DEFAULT 'text',
+    file_path VARCHAR(500) DEFAULT NULL,
+    file_name VARCHAR(255) DEFAULT NULL,
+    file_size INT DEFAULT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    is_deleted TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_conv_created (conversation_id, created_at),
+    INDEX idx_sender (sender_id),
+    INDEX idx_unread (conversation_id, is_read, sender_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- U) Live Contact Widget
+-- =====================================================
+CREATE TABLE IF NOT EXISTS live_contacts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) DEFAULT NULL,
+    message TEXT,
+    status ENUM('new','chatting','converted','closed') DEFAULT 'new',
+    assigned_admin_id INT DEFAULT NULL,
+    user_id INT DEFAULT NULL,
+    session_token VARCHAR(64) DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    user_agent TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_session (session_token),
+    INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS live_contact_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    contact_id INT NOT NULL,
+    sender_type ENUM('guest','admin') NOT NULL,
+    sender_id INT DEFAULT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_contact (contact_id, created_at),
+    INDEX idx_unread (contact_id, is_read, sender_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- V) Internal Messages
+-- =====================================================
+CREATE TABLE IF NOT EXISTS internal_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    project_id INT DEFAULT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    read_at TIMESTAMP NULL DEFAULT NULL,
+    parent_id INT DEFAULT NULL,
+    is_deleted_sender TINYINT(1) DEFAULT 0,
+    is_deleted_recipient TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_sender (sender_id),
+    INDEX idx_recipient (recipient_id, is_read),
+    INDEX idx_project (project_id),
+    INDEX idx_parent (parent_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- W) Invoice Payments & Invoice Emails
+-- =====================================================
+CREATE TABLE IF NOT EXISTS invoice_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    method VARCHAR(100),
+    transaction_id VARCHAR(255),
+    status VARCHAR(100) DEFAULT 'completed',
+    notes TEXT,
+    paid_by INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS invoice_emails (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoice_id INT NOT NULL,
+    sent_to VARCHAR(255) NOT NULL,
+    sent_by INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT,
+    pdf_path VARCHAR(500) DEFAULT NULL,
+    status ENUM('sent','failed') DEFAULT 'sent',
+    error_message TEXT DEFAULT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_invoice (invoice_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- X) Deadline Extension Requests
+-- =====================================================
+CREATE TABLE IF NOT EXISTS deadline_extension_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    developer_id INT NOT NULL,
+    current_deadline DATE NOT NULL,
+    requested_deadline DATE NOT NULL,
+    reason TEXT NOT NULL,
+    status ENUM('pending','approved','rejected') DEFAULT 'pending',
+    admin_note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Y) Subscription Plans, Subscriptions & Payments
+-- =====================================================
+CREATE TABLE IF NOT EXISTS subscription_plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'USD',
+    billing_cycle ENUM('monthly','quarterly','yearly') DEFAULT 'monthly',
+    features TEXT,
+    is_popular TINYINT(1) DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    stripe_price_id VARCHAR(255) DEFAULT NULL,
+    paypal_plan_id VARCHAR(255) DEFAULT NULL,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    plan_id INT NOT NULL,
+    payment_gateway ENUM('stripe','paypal','manual') NOT NULL,
+    gateway_subscription_id VARCHAR(255) DEFAULT NULL,
+    gateway_customer_id VARCHAR(255) DEFAULT NULL,
+    status ENUM('active','past_due','cancelled','expired','trialing') DEFAULT 'active',
+    current_period_start TIMESTAMP NULL,
+    current_period_end TIMESTAMP NULL,
+    cancelled_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    INDEX idx_status (status),
+    INDEX idx_gateway_sub (gateway_subscription_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS subscription_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subscription_id INT NOT NULL,
+    user_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'USD',
+    payment_gateway ENUM('stripe','paypal','manual') NOT NULL,
+    gateway_payment_id VARCHAR(255) DEFAULT NULL,
+    status ENUM('succeeded','pending','failed','refunded') DEFAULT 'pending',
+    paid_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_subscription (subscription_id),
+    INDEX idx_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Z) Email Log & Email Templates
+-- =====================================================
+CREATE TABLE IF NOT EXISTS email_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    to_email VARCHAR(255) NOT NULL,
+    to_name VARCHAR(255),
+    subject VARCHAR(500),
+    body TEXT,
+    status ENUM('sent','failed') DEFAULT 'sent',
+    error_message TEXT,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS email_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    subject VARCHAR(500) NOT NULL,
+    body TEXT NOT NULL,
+    variables TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

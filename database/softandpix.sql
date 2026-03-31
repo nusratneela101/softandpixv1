@@ -339,7 +339,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `login_attempts` INT DEFAULT 0,
   `locked_until` DATETIME NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `last_login` TIMESTAMP NULL
+  `last_login` TIMESTAMP NULL,
+  `last_active` TIMESTAMP NULL DEFAULT NULL
 );
 
 -- Custom Roles

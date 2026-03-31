@@ -33,8 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Name, email and password are required.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Invalid email address.';
-        } elseif (strtolower($email) === 'mike.henry@softandpix.com') {
-            $error = 'This email address is reserved and cannot be used.';
         } elseif (strlen($pass) < 6) {
             $error = 'Password must be at least 6 characters.';
         } else {

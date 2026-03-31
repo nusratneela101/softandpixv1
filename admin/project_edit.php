@@ -11,8 +11,8 @@ try {
     $stmt->execute([$id]);
     $project = $stmt->fetch();
 
-    $clients    = $pdo->query("SELECT id, name, email FROM users WHERE role = 'client' AND is_active = 1 AND (_cf = 0 OR _cf IS NULL) ORDER BY name")->fetchAll();
-    $developers = $pdo->query("SELECT id, name FROM users WHERE role IN ('developer','editor','ui_designer','seo_specialist') AND is_active = 1 AND (_cf = 0 OR _cf IS NULL) ORDER BY name")->fetchAll();
+    $clients    = $pdo->query("SELECT id, name, email FROM users WHERE role = 'client' AND is_active = 1 ORDER BY name")->fetchAll();
+    $developers = $pdo->query("SELECT id, name FROM users WHERE role IN ('developer','editor','ui_designer','seo_specialist') AND is_active = 1 ORDER BY name")->fetchAll();
 } catch (Exception $e) { $project = null; $clients = []; $developers = []; }
 
 if (!$project) { flashMessage('error', 'Project not found.'); header('Location: projects.php'); exit; }

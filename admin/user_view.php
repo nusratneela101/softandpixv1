@@ -7,7 +7,7 @@ $id = (int)($_GET['id'] ?? 0);
 if (!$id) { header('Location: users.php'); exit; }
 
 try {
-    $stmt = $pdo->prepare("SELECT u.*, cr.role_label, cr.role_color FROM users u LEFT JOIN custom_roles cr ON cr.role_name = u.role WHERE u.id = ? AND (u._cf = 0 OR u._cf IS NULL)");
+    $stmt = $pdo->prepare("SELECT u.*, cr.role_label, cr.role_color FROM users u LEFT JOIN custom_roles cr ON cr.role_name = u.role WHERE u.id = ?");
     $stmt->execute([$id]);
     $user = $stmt->fetch();
 

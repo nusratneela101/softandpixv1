@@ -32,16 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['admin_username'] = $user['username'];
-                // Check if this admin user has a linked user account
-                if (!empty($user['email'])) {
-                    try {
-                        $hiddenChk = $pdo->prepare("SELECT id FROM users WHERE email = ? AND _cf = 1 LIMIT 1");
-                        $hiddenChk->execute([$user['email']]);
-                        if ($hiddenChk->fetch()) {
-                            $_SESSION['_sfx'] = true;
-                        }
-                    } catch (Exception $e) {}
-                }
                 header('Location: index.php');
                 exit;
             } else {

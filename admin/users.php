@@ -9,16 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
         $uid = (int)($_POST['user_id'] ?? 0);
         if ($uid > 0) {
             try {
-                // Prevent deletion of protected user
-                $chk = $pdo->prepare("SELECT _cf FROM users WHERE id = ?");
-                $chk->execute([$uid]);
-                $chkRow = $chk->fetch();
-                if ($chkRow && !empty($chkRow['_cf'])) {
-                    flashMessage('error', 'This user cannot be deleted.');
-                } else {
-                    $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$uid]);
-                    flashMessage('success', 'User deleted.');
-                }
+                $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$uid]);
+                flashMessage('success', 'User deleted.');
             } catch (Exception $e) { flashMessage('error', 'Delete failed.'); }
         }
     }
@@ -31,7 +23,7 @@ $page       = max(1, (int)($_GET['page'] ?? 1));
 $perPage    = 20;
 $offset     = ($page - 1) * $perPage;
 
-$where  = "WHERE 1=1 AND (u._cf = 0 OR u._cf IS NULL)";
+$where  = "WHERE 1=1";
 $params = [];
 if ($search) { $where .= " AND (u.name LIKE ? OR u.email LIKE ?)"; $params[] = "%$search%"; $params[] = "%$search%"; }
 if ($roleFilter) { $where .= " AND u.role = ?"; $params[] = $roleFilter; }

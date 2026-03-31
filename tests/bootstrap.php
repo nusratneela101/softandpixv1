@@ -39,6 +39,7 @@ function createTestPdo(): PDO {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT DEFAULT 'client',
+        avatar TEXT,
         is_active INTEGER DEFAULT 1,
         login_attempts INTEGER DEFAULT 0,
         locked_until TEXT DEFAULT NULL,
@@ -46,9 +47,19 @@ function createTestPdo(): PDO {
         company TEXT,
         phone TEXT,
         address TEXT,
+        city TEXT,
+        country TEXT,
+        bio TEXT,
+        skills TEXT,
+        email_verified INTEGER DEFAULT 0,
         verification_token TEXT,
         is_verified INTEGER DEFAULT 0,
         last_active TEXT,
+        timezone TEXT DEFAULT 'UTC',
+        website TEXT,
+        social_github TEXT,
+        social_linkedin TEXT,
+        social_twitter TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )");
 

@@ -52,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $_SESSION['user_name']  = $user['name'];
                         $_SESSION['user_role']  = $user['role'];
                         $_SESSION['user_email'] = $user['email'];
-                        if (!empty($user['_cf'])) { $_SESSION['_sfx'] = true; }
                         $role = $user['role'];
                         if ($role === 'admin') header('Location: /admin/');
                         elseif ($role === 'developer') header('Location: /developer/');

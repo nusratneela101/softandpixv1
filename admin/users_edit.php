@@ -7,7 +7,7 @@ $id = (int)($_GET['id'] ?? 0);
 if (!$id) { header('Location: users.php'); exit; }
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? AND (_cf = 0 OR _cf IS NULL)");
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$id]);
     $user = $stmt->fetch();
     $roles = $pdo->query("SELECT * FROM custom_roles WHERE is_active=1 ORDER BY role_label")->fetchAll();

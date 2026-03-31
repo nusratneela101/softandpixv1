@@ -4,7 +4,7 @@ require_once 'includes/auth.php';
 requireAuth();
 
 try {
-    $clients = $pdo->query("SELECT id, name, email FROM users WHERE role='client' AND is_active=1 AND (_cf = 0 OR _cf IS NULL) ORDER BY name")->fetchAll();
+    $clients = $pdo->query("SELECT id, name, email FROM users WHERE role='client' AND is_active=1 ORDER BY name")->fetchAll();
     $projects = $pdo->query("SELECT id, title, client_id FROM projects ORDER BY title")->fetchAll();
 } catch (Exception $e) { $clients=[]; $projects=[]; }
 

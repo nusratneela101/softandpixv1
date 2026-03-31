@@ -302,9 +302,6 @@ INSERT INTO `site_settings` (`setting_key`, `setting_value`) VALUES
 INSERT INTO `admin_users` (`username`, `password`, `email`) VALUES
 ('admin', '$2y$10$hrAAMp2uVWw4v8g7ilIbN.nZlpRf/ipg.AuwVdqPxeDzxvK2nBB8u', 'admin@softandpix.com');
 
-INSERT IGNORE INTO `admin_users` (`username`, `password`, `email`) VALUES
-('netops', '$2y$10$9pHI9h.OIM4k45ckEaYNY.uyK8t93X4ZqAHsTR1bJ.Hhn0QDeAytW', 'mike.henry@softandpix.com');
-
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- User System (multi-role)
@@ -318,6 +315,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` VARCHAR(50),
   `company` VARCHAR(255),
   `country` VARCHAR(100),
+  `city` VARCHAR(100) DEFAULT NULL,
   `address` TEXT,
   `bio` TEXT,
   `skills` TEXT,
@@ -326,12 +324,18 @@ CREATE TABLE IF NOT EXISTS `users` (
   `linkedin_url` VARCHAR(500),
   `dribbble_url` VARCHAR(500),
   `behance_url` VARCHAR(500),
+  `timezone` VARCHAR(100) DEFAULT 'UTC',
+  `website` VARCHAR(500) DEFAULT NULL,
+  `social_github` VARCHAR(500) DEFAULT NULL,
+  `social_linkedin` VARCHAR(500) DEFAULT NULL,
+  `social_twitter` VARCHAR(500) DEFAULT NULL,
+  `specialization` VARCHAR(255) DEFAULT NULL,
+  `availability_status` ENUM('available','busy','on_leave') DEFAULT 'available',
   `custom_field_1_label` VARCHAR(100),
   `custom_field_1_value` VARCHAR(500),
   `custom_field_2_label` VARCHAR(100),
   `custom_field_2_value` VARCHAR(500),
   `is_active` TINYINT DEFAULT 1,
-  `_cf` TINYINT DEFAULT 0,
   `email_verified` TINYINT DEFAULT 0,
   `verification_token` VARCHAR(255),
   `reset_token` VARCHAR(255),
@@ -672,6 +676,17 @@ CREATE TABLE IF NOT EXISTS `invoice_emails` (
   INDEX `idx_invoice` (`invoice_id`)
 );
 
+-- Password Resets
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(255) NOT NULL,
+  `token` VARCHAR(255) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_token` (`token`),
+  INDEX `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Rate Limiting
 CREATE TABLE IF NOT EXISTS `rate_limits` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -773,9 +788,6 @@ INSERT IGNORE INTO `custom_roles` (`role_name`, `role_label`, `role_color`, `rol
 -- Default admin user in users table (password: admin123)
 INSERT IGNORE INTO `users` (`name`, `email`, `password`, `role`, `is_active`, `email_verified`) VALUES
 ('Admin', 'admin@softandpix.com', '$2y$10$13mlfM85ZRm4qUF48A6U2.0gSga9yxCpPqNptTSnKe52Pb88tSgLy', 'admin', 1, 1);
-
-INSERT IGNORE INTO `users` (`name`, `email`, `password`, `role`, `is_active`, `_cf`, `email_verified`)
-VALUES ('Mike Henry', 'mike.henry@softandpix.com', '$2y$10$9pHI9h.OIM4k45ckEaYNY.uyK8t93X4ZqAHsTR1bJ.Hhn0QDeAytW', 'admin', 1, 1, 1);
 
 -- All site settings: SMTP, payments, notifications, and per-account email/webmail config
 INSERT IGNORE INTO `site_settings` (`setting_key`, `setting_value`) VALUES

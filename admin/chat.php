@@ -1,7 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/config/db.php';
 require_once 'includes/auth.php';
-require_once 'includes/functions.php';
 requireAuth();
 
 $csrf_token = generateCsrfToken();

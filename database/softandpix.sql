@@ -774,6 +774,597 @@ CREATE TABLE IF NOT EXISTS `email_templates` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- =====================================================
+-- Additional tables: conversations / messages
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `conversations` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `type` ENUM('direct','group') DEFAULT 'direct',
+    `name` VARCHAR(255),
+    `created_by` INT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `conversation_participants` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `conversation_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `joined_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`conversation_id`) REFERENCES `conversations`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `messages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `conversation_id` INT NOT NULL,
+    `sender_id` INT NOT NULL,
+    `message` TEXT,
+    `message_type` ENUM('text','agreement','system','ai') DEFAULT 'text',
+    `agreement_id` INT NULL,
+    `is_read` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`conversation_id`) REFERENCES `conversations`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`sender_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Agreements
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `agreements` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `client_id` INT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `project_name` VARCHAR(255) DEFAULT NULL,
+    `total_budget` DECIMAL(12,2) DEFAULT 0,
+    `deadline` DATE DEFAULT NULL,
+    `terms` TEXT,
+    `status` ENUM('draft','pending','approved','rejected','signed') DEFAULT 'pending',
+    `signed_at` DATETIME DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`client_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Tasks & task comments
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `tasks` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `project_id` INT NOT NULL,
+    `assigned_to` INT DEFAULT NULL,
+    `created_by` INT NOT NULL,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `priority` ENUM('low','medium','high','urgent') DEFAULT 'medium',
+    `status` ENUM('pending','in_progress','completed','on_hold') DEFAULT 'pending',
+    `due_date` DATE DEFAULT NULL,
+    `completed_at` DATETIME DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`assigned_to`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `task_comments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `task_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `comment` TEXT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Activity log
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `activity_log` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT DEFAULT NULL,
+    `action` VARCHAR(100) NOT NULL,
+    `details` TEXT,
+    `entity_type` VARCHAR(50) DEFAULT NULL,
+    `entity_id` INT DEFAULT NULL,
+    `ip_address` VARCHAR(45) DEFAULT NULL,
+    `user_agent` TEXT DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_action` (`action`),
+    INDEX `idx_entity` (`entity_type`, `entity_id`),
+    INDEX `idx_created` (`created_at`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Time tracking
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `time_entries` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `project_id` INT NOT NULL,
+    `task_id` INT DEFAULT NULL,
+    `description` TEXT,
+    `start_time` DATETIME NOT NULL,
+    `end_time` DATETIME DEFAULT NULL,
+    `duration_minutes` INT DEFAULT 0,
+    `is_manual` TINYINT(1) DEFAULT 0,
+    `is_approved` TINYINT(1) DEFAULT 0,
+    `approved_by` INT DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`approved_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    INDEX `idx_user_project` (`user_id`, `project_id`),
+    INDEX `idx_date` (`start_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `active_timers` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL UNIQUE,
+    `project_id` INT NOT NULL,
+    `task_id` INT DEFAULT NULL,
+    `start_time` DATETIME NOT NULL,
+    `description` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Theme settings
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `theme_settings` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `setting_key` VARCHAR(100) NOT NULL UNIQUE,
+    `setting_value` TEXT,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Recurring invoices
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `recurring_invoices` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `client_id` INT NOT NULL,
+    `project_id` INT DEFAULT NULL,
+    `frequency` ENUM('weekly','monthly','quarterly','yearly') NOT NULL DEFAULT 'monthly',
+    `next_generate_date` DATE NOT NULL,
+    `end_date` DATE DEFAULT NULL,
+    `status` ENUM('active','paused','cancelled') DEFAULT 'active',
+    `line_items` JSON NOT NULL,
+    `tax_rate` DECIMAL(5,2) DEFAULT 0.00,
+    `notes` TEXT,
+    `created_by` INT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`client_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE SET NULL,
+    FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_next_date` (`next_generate_date`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `recurring_invoice_history` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `recurring_invoice_id` INT NOT NULL,
+    `generated_invoice_id` INT NOT NULL,
+    `generated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`recurring_invoice_id`) REFERENCES `recurring_invoices`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`generated_invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Emails & attachments
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `emails` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `from_user_id` INT DEFAULT NULL,
+    `from_email` VARCHAR(255),
+    `to_user_id` INT DEFAULT NULL,
+    `to_email` VARCHAR(255),
+    `subject` VARCHAR(500),
+    `body` TEXT,
+    `attachments` TEXT,
+    `is_read` TINYINT(1) DEFAULT 0,
+    `is_starred` TINYINT(1) DEFAULT 0,
+    `is_draft` TINYINT(1) DEFAULT 0,
+    `is_trash` TINYINT(1) DEFAULT 0,
+    `folder` ENUM('inbox','sent','draft','trash') DEFAULT 'inbox',
+    `smtp_account` ENUM('info','support') DEFAULT 'support',
+    `sent_via_smtp` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `email_attachments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `email_id` INT NOT NULL,
+    `file_name` VARCHAR(255),
+    `file_path` VARCHAR(500),
+    `file_size` INT,
+    FOREIGN KEY (`email_id`) REFERENCES `emails`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Chatbot rules
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `chatbot_rules` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `keywords` VARCHAR(500),
+    `response` TEXT,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `priority` INT DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Payments & payment gateways
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `payments` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `invoice_id` INT NOT NULL,
+    `client_id` INT NOT NULL,
+    `amount` DECIMAL(10,2) NOT NULL,
+    `gateway` ENUM('square','stripe','paypal','manual') NOT NULL,
+    `transaction_id` VARCHAR(255),
+    `status` ENUM('pending','completed','failed','refunded') DEFAULT 'pending',
+    `gateway_response` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`client_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `payment_gateways` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `gateway_name` VARCHAR(50) NOT NULL,
+    `is_active` TINYINT(1) DEFAULT 0,
+    `api_key` VARCHAR(500),
+    `api_secret` VARCHAR(500),
+    `sandbox_mode` TINYINT(1) DEFAULT 1,
+    `extra_config` TEXT,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `payment_transactions` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `invoice_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `gateway` ENUM('stripe','paypal','square','manual') NOT NULL,
+    `transaction_id` VARCHAR(255),
+    `amount` DECIMAL(10,2) NOT NULL,
+    `currency` VARCHAR(10) DEFAULT 'USD',
+    `status` ENUM('pending','completed','failed','refunded','partially_refunded') DEFAULT 'pending',
+    `gateway_response` JSON,
+    `payment_method` VARCHAR(100),
+    `receipt_url` VARCHAR(500),
+    `metadata` JSON,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_invoice` (`invoice_id`),
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_gateway` (`gateway`),
+    INDEX `idx_status` (`status`),
+    INDEX `idx_transaction` (`transaction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `payment_settings` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `gateway` VARCHAR(50) NOT NULL,
+    `setting_key` VARCHAR(100) NOT NULL,
+    `setting_value` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_gateway_key` (`gateway`, `setting_key`),
+    INDEX `idx_gateway` (`gateway`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `refunds` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `transaction_id` INT NOT NULL,
+    `refund_id` VARCHAR(255),
+    `amount` DECIMAL(10,2) NOT NULL,
+    `reason` TEXT,
+    `status` ENUM('pending','processed','failed') DEFAULT 'pending',
+    `processed_by` INT DEFAULT NULL,
+    `gateway_response` JSON,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `processed_at` DATETIME DEFAULT NULL,
+    FOREIGN KEY (`transaction_id`) REFERENCES `payment_transactions`(`id`) ON DELETE CASCADE,
+    INDEX `idx_transaction` (`transaction_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Progress updates
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `progress_updates` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `project_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `update_text` TEXT,
+    `progress_percent` INT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- E-signature tables
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `esign_documents` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `content` LONGTEXT,
+    `file_path` VARCHAR(500),
+    `created_by` INT NOT NULL,
+    `status` ENUM('draft','pending','signed','expired','revoked') DEFAULT 'draft',
+    `unique_hash` VARCHAR(64) NOT NULL UNIQUE,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `expires_at` DATETIME DEFAULT NULL,
+    INDEX `idx_status` (`status`),
+    INDEX `idx_hash` (`unique_hash`),
+    INDEX `idx_created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `esign_signatures` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `document_id` INT NOT NULL,
+    `signer_id` INT DEFAULT NULL,
+    `signer_name` VARCHAR(255) NOT NULL,
+    `signer_email` VARCHAR(255) NOT NULL,
+    `signature_data` LONGTEXT,
+    `signature_type` ENUM('draw','type','upload') DEFAULT 'draw',
+    `signature_ip` VARCHAR(45),
+    `signed_at` DATETIME DEFAULT NULL,
+    `status` ENUM('pending','signed','declined') DEFAULT 'pending',
+    `decline_reason` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_document` (`document_id`),
+    INDEX `idx_signer` (`signer_id`),
+    INDEX `idx_status` (`status`),
+    FOREIGN KEY (`document_id`) REFERENCES `esign_documents`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `esign_templates` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `content` LONGTEXT NOT NULL,
+    `category` VARCHAR(100) DEFAULT 'general',
+    `created_by` INT NOT NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_category` (`category`),
+    INDEX `idx_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `esign_audit_log` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `document_id` INT NOT NULL,
+    `action` VARCHAR(100) NOT NULL,
+    `actor_id` INT DEFAULT NULL,
+    `actor_name` VARCHAR(255),
+    `actor_ip` VARCHAR(45),
+    `details` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_document` (`document_id`),
+    INDEX `idx_action` (`action`),
+    INDEX `idx_created` (`created_at`),
+    FOREIGN KEY (`document_id`) REFERENCES `esign_documents`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Export history
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `export_history` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `export_type` ENUM('csv','excel','pdf') NOT NULL,
+    `data_type` VARCHAR(50) NOT NULL,
+    `filters` JSON,
+    `file_path` VARCHAR(500),
+    `file_name` VARCHAR(255),
+    `file_size` INT DEFAULT 0,
+    `record_count` INT DEFAULT 0,
+    `status` ENUM('pending','completed','failed') DEFAULT 'completed',
+    `error_message` TEXT,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_data_type` (`data_type`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Push subscriptions
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `push_subscriptions` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `endpoint` VARCHAR(500) NOT NULL,
+    `p256dh` VARCHAR(500) NOT NULL,
+    `auth` VARCHAR(500) NOT NULL,
+    `user_agent` VARCHAR(500) DEFAULT NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `last_used_at` DATETIME DEFAULT NULL,
+    `last_error` TEXT DEFAULT NULL,
+    `error_count` INT DEFAULT 0,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_user_active` (`user_id`, `is_active`),
+    UNIQUE KEY `unique_endpoint` (`endpoint`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Invoice reminders
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `invoice_reminders` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `invoice_id` INT NOT NULL,
+    `sent_to` VARCHAR(255) NOT NULL,
+    `sent_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`invoice_id`) REFERENCES `invoices`(`id`) ON DELETE CASCADE,
+    INDEX `idx_invoice_id` (`invoice_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Search history
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `search_history` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `query` VARCHAR(255) NOT NULL,
+    `results_count` INT DEFAULT 0,
+    `entity_types` VARCHAR(255),
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_query` (`query`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Message translations
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `message_translations` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `message_id` INT NOT NULL,
+    `source_lang` VARCHAR(10) DEFAULT 'auto',
+    `target_lang` VARCHAR(10) NOT NULL,
+    `original_text` TEXT NOT NULL,
+    `translated_text` TEXT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_translation` (`message_id`, `target_lang`),
+    INDEX `idx_message` (`message_id`),
+    FOREIGN KEY (`message_id`) REFERENCES `messages`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Video call tables
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `video_rooms` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `room_code` VARCHAR(20) UNIQUE NOT NULL,
+    `room_name` VARCHAR(255) NOT NULL,
+    `room_type` ENUM('instant','scheduled','recurring') DEFAULT 'instant',
+    `created_by` INT NOT NULL,
+    `max_participants` INT DEFAULT 6,
+    `status` ENUM('waiting','active','ended','cancelled') DEFAULT 'waiting',
+    `is_recording` TINYINT(1) DEFAULT 0,
+    `scheduled_at` DATETIME NULL,
+    `scheduled_end` DATETIME NULL,
+    `recurrence_rule` VARCHAR(100) NULL,
+    `description` TEXT NULL,
+    `password` VARCHAR(255) NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `ended_at` DATETIME NULL,
+    FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_status` (`status`),
+    INDEX `idx_scheduled` (`scheduled_at`),
+    INDEX `idx_created_by` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `video_participants` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `room_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `is_muted` TINYINT(1) DEFAULT 0,
+    `is_video_on` TINYINT(1) DEFAULT 1,
+    `is_screen_sharing` TINYINT(1) DEFAULT 0,
+    `role` ENUM('host','co-host','participant') DEFAULT 'participant',
+    `joined_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `left_at` DATETIME NULL,
+    FOREIGN KEY (`room_id`) REFERENCES `video_rooms`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_room` (`room_id`),
+    INDEX `idx_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `video_signals` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `room_id` INT NOT NULL,
+    `from_user` INT NOT NULL,
+    `to_user` INT NOT NULL,
+    `signal_type` ENUM('offer','answer','ice-candidate','join','leave','mute','unmute','screen-start','screen-stop') NOT NULL,
+    `signal_data` LONGTEXT NOT NULL,
+    `is_read` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_to_room` (`to_user`, `room_id`, `is_read`),
+    INDEX `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `video_chat` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `room_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `message` TEXT NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`room_id`) REFERENCES `video_rooms`(`id`) ON DELETE CASCADE,
+    INDEX `idx_room_time` (`room_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `meeting_invitations` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `room_id` INT NOT NULL,
+    `invited_by` INT NOT NULL,
+    `invited_user_id` INT NULL,
+    `invited_email` VARCHAR(255) NULL,
+    `status` ENUM('pending','accepted','declined') DEFAULT 'pending',
+    `email_sent` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`room_id`) REFERENCES `video_rooms`(`id`) ON DELETE CASCADE,
+    INDEX `idx_room` (`room_id`),
+    INDEX `idx_user` (`invited_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Cart & Orders
+-- =====================================================
+CREATE TABLE IF NOT EXISTS `cart` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT DEFAULT NULL,
+    `session_id` VARCHAR(255) DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `cart_items` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `cart_id` INT NOT NULL,
+    `item_name` VARCHAR(255) NOT NULL,
+    `item_type` VARCHAR(50) DEFAULT 'service',
+    `item_id` INT DEFAULT NULL,
+    `quantity` INT DEFAULT 1,
+    `unit_price` DECIMAL(10,2) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`cart_id`) REFERENCES `cart`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `orders` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `invoice_id` INT DEFAULT NULL,
+    `total_amount` DECIMAL(10,2) NOT NULL,
+    `currency` VARCHAR(10) DEFAULT 'USD',
+    `payment_method` VARCHAR(50) DEFAULT NULL,
+    `status` ENUM('pending','paid','failed','refunded','cancelled') DEFAULT 'pending',
+    `notes` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    INDEX `idx_user` (`user_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Default custom roles

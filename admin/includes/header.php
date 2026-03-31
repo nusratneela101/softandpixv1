@@ -127,6 +127,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="bi bi-calendar-x"></i> Deadline Requests
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'tasks.php' ? 'active' : ''; ?>" href="tasks.php">
+                    <i class="bi bi-clipboard-check"></i> Tasks
+                </a>
+            </li>
             <!-- Communication -->
             <li class="nav-item">
                 <span class="sidebar-section-title">Communication</span>
@@ -148,6 +153,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <?php if ($lcw_unread > 0): ?>
                     <span class="badge bg-danger ms-1"><?php echo $lcw_unread; ?></span>
                     <?php endif; ?>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'video_call.php' ? 'active' : ''; ?>" href="video_call.php">
+                    <i class="bi bi-camera-video"></i> Video Calls
                 </a>
             </li>
             <li class="nav-item">
@@ -180,8 +190,67 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'recurring_invoices.php' ? 'active' : ''; ?>" href="recurring_invoices.php">
+                    <i class="bi bi-arrow-repeat"></i> Recurring Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'payments.php' ? 'active' : ''; ?>" href="payments.php">
+                    <i class="bi bi-credit-card"></i> Payments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'payment_settings.php' ? 'active' : ''; ?>" href="payment_settings.php">
+                    <i class="bi bi-sliders"></i> Payment Gateways
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link <?php echo $current_page === 'notifications.php' ? 'active' : ''; ?>" href="notifications.php">
                     <i class="bi bi-bell"></i> Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="sidebar-section-title">Legal</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'agreements.php' ? 'active' : ''; ?>" href="agreements.php">
+                    <i class="bi bi-file-earmark-text"></i> Agreements
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'esign.php' ? 'active' : ''; ?>" href="esign.php">
+                    <i class="bi bi-pen"></i> E-Signatures
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="sidebar-section-title">Team &amp; Dev</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'developers.php' ? 'active' : ''; ?>" href="developers.php">
+                    <i class="bi bi-code-slash"></i> Developers
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'time_tracking.php' ? 'active' : ''; ?>" href="time_tracking.php">
+                    <i class="bi bi-clock-history"></i> Time Tracking
+                </a>
+            </li>
+            <li class="nav-item">
+                <span class="sidebar-section-title">Reports</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'activity_log.php' ? 'active' : ''; ?>" href="activity_log.php">
+                    <i class="bi bi-activity"></i> Activity Log
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'reports.php' ? 'active' : ''; ?>" href="reports.php">
+                    <i class="bi bi-graph-up"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'export.php' ? 'active' : ''; ?>" href="export.php">
+                    <i class="bi bi-download"></i> Export Data
                 </a>
             </li>
             <li class="nav-item">
@@ -190,6 +259,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <li class="nav-item">
                 <a class="nav-link <?php echo $current_page === 'settings.php' ? 'active' : ''; ?>" href="settings.php">
                     <i class="bi bi-gear"></i> Site Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'push_settings.php' ? 'active' : ''; ?>" href="push_settings.php">
+                    <i class="bi bi-bell-fill"></i> Push Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo $current_page === 'theme.php' ? 'active' : ''; ?>" href="theme.php">
+                    <i class="bi bi-palette"></i> Theme
                 </a>
             </li>
             <li class="nav-item">

@@ -93,10 +93,12 @@ $meta_keywords = $settings['meta_keywords'] ?? '';
           <li><a class="nav-link active" href="#">Home</a></li>
           <li><a class="nav-link scrollto" href="#about">About</a></li>
           <li><a class="nav-link scrollto" href="#services">Services</a></li>
+          <li><a class="nav-link scrollto" href="#pricing">Pricing</a></li>
           <li><a class="nav-link scrollto" href="#portfolio">Portfolio</a></li>
           <li><a class="nav-link scrollto" href="#team">Team</a></li>
           <li><a class="nav-link scrollto" href="#contact">Contact</a></li>
-          <li><a class="getstarted scrollto" href="#about">Get Started</a></li>
+          <li><a class="nav-link" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+          <li><a class="getstarted" href="register.php"><i class="bi bi-person-plus"></i> Register</a></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
@@ -661,6 +663,8 @@ $meta_keywords = $settings['meta_keywords'] ?? '';
     });
   });
   </script>
+
+<?php include 'includes/live-chat-widget.php'; ?>
 
 </body>
 </html>
